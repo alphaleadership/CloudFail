@@ -212,7 +212,7 @@ def subdomain_scan(target, subdomains):
 
                 subdomain = "{}.{}".format(word.strip(), target)
                 try:
-                    target_http = requests.get("http://" + subdomain)
+                    target_http = requests.get("http://" + subdomain, timeout=60)
                     target_http = str(target_http.status_code)
                     ip = socket.gethostbyname(subdomain)
                     ifIpIsWithin = inCloudFlare(ip)
@@ -242,14 +242,14 @@ def update():
     print_out(Fore.CYAN + "Updating CloudFlare subnet...")
     if(args.tor == False):
         headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11'}
-        r = requests.get("https://www.cloudflare.com/ips-v4", headers=headers, cookies={'__cfduid': "d7c6a0ce9257406ea38be0156aa1ea7a21490639772"}, stream=True)
+        r = requests.get("https://www.cloudflare.com/ips-v4", headers=headers, cookies={'__cfduid': "d7c6a0ce9257406ea38be0156aa1ea7a21490639772"}, stream=True, timeout=60)
         with open('data/cf-subnet.txt', 'wb') as fd:
             for chunk in r.iter_content(4000):
                 fd.write(chunk)
     else:
         print_out(Fore.RED + Style.BRIGHT+"Unable to fetch CloudFlare subnet while TOR is active")
     print_out(Fore.CYAN + "Updating Crimeflare database...")
-    r = requests.get("http://crimeflare.net:83/domains/ipout.zip", stream=True)
+    r = requests.get("http://crimeflare.net:83/domains/ipout.zip", stream=True, timeout=60)
     with open('data/ipout.zip', 'wb') as fd:
         for chunk in r.iter_content(4000):
             fd.write(chunk)
@@ -290,7 +290,7 @@ if args.tor is True:
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
     socket.socket = socks.socksocket
     try:
-        tor_ip = requests.get(ipcheck_url)
+        tor_ip = requests.get(ipcheck_url, timeout=60)
         tor_ip = str(tor_ip.text)
 
         print_out(Fore.WHITE + Style.BRIGHT + "TOR connection established!")
